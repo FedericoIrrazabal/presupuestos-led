@@ -1,4 +1,4 @@
-const CACHE = 'presupuestos-v7';
+const CACHE = 'presupuestos-v8';
 const SHELL = [
   './',
   './index.html',
@@ -17,6 +17,9 @@ const SHELL = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-180.png',
+  './icons/favicon-32.png',
+  './icons/favicon-16.png',
+  './favicon.ico',
 ];
 
 self.addEventListener('install', (event) => {

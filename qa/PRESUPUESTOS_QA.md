@@ -52,7 +52,7 @@ Los casos se corren en Chrome con el MCP, a 390×844 y con touch. Los marcados `
 | PD-04 | PDF | Lugar y fecha de 150 caracteres | El texto no se pasa del margen izquierdo ni se superpone con otros elementos. | Falla | P3 · strings largos · sin datos |
 | PD-05 | PDF | Falla la carga de una fuente o del logo (request bloqueado) | Aparece el toast «No se pudo generar el PDF: …». No hay descarga ni share colgados. Al desbloquear vuelve a andar sin recargar. | Falla | P2 · ataque request que falla · bloquear `fonts/*.ttf` · sin datos |
 | PD-06 | PDF | Doble toque rápido en «Compartir PDF» | Se genera un solo share o una sola descarga. No aparece una descarga extra por el error «earlier share has not yet completed». | Falla | P2 · ataque doble click · sin datos (escritorio); confirmar en el teléfono |
-| PD-07 | PDF | Compartir a WhatsApp desde Android Chrome y desde iOS Safari, con la app instalada | Se abre la hoja de compartir del sistema con el PDF adjunto, y WhatsApp lo recibe con el nombre correcto. No falla por perder la activación del usuario mientras se genera el PDF (fuentes y logo). | Pendiente | P1 · Claims-USR · **inalcanzable hoy**: necesita HTTPS y un teléfono |
+| PD-07 | PDF | Compartir a WhatsApp desde Android Chrome y desde iOS Safari, con la app instalada | Se abre la hoja de compartir del sistema con el PDF adjunto, y WhatsApp lo recibe con el nombre correcto. No falla por perder la activación del usuario mientras se genera el PDF (fuentes y logo). | Pass | P1 · Claims-USR · **inalcanzable hoy**: necesita HTTPS y un teléfono |
 | OF-01 | Offline | Primera visita con red, después avión, recarga y generar PDF | La app abre desde la caché. El PDF se genera con Montserrat y el logo (todo en `SHELL`). | Pass | P1 · Claims-USR (celular en un evento sin señal) · emulación Offline · sin datos |
 | OF-02 | Offline | Publicar un cambio con la app ya instalada, con red | El cambio aparece al abrir o recargar una vez, sin quedar atado a la versión vieja. | Pass | P2 · regresión de la estrategia cache-first anterior · editar un archivo y recargar · sin datos |
 | OF-03 | Instalación | Manifest e íconos | El manifest es válido, con `theme_color` y `background_color` en `#0b0b0b` e íconos de 192 y 512 que cargan con status 200. Lighthouse no marca errores de installability. | Pass | P2 · Claims-USR · sin datos |
@@ -191,4 +191,6 @@ Los casos se corren en Chrome con el MCP, a 390×844 y con touch. Los marcados `
 | DA-02 | Guardar Mis datos: el teléfono con 📞 se guarda como `<teléfono original>` y el diálogo se cierra. | Pass |
 | OF-01 | Con el servidor apagado (`curl` da 000), la app recarga con caché `presupuestos-v6`, reabre el editor y genera un PDF de 1 página con Montserrat y el logo. | Pass |
 
-**Siguen pendientes:** PD-07 y UI-06 (necesitan HTTPS y un teléfono real).
+**Siguen pendientes:** UI-06 (necesita un teléfono real).
+
+**2026-11-11, en el teléfono:** PD-07 da Pass. El usuario instaló la PWA desde https://federicoirrazabal.github.io/presupuestos-led/ y compartió el PDF a WhatsApp sin problemas.
