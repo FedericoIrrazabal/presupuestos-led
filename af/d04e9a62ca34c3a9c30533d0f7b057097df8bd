@@ -1,0 +1,25 @@
+README.md
+  s_5197a19cd2084d::t_68f707d1668cfa 1-22
+pdf.js
+  s_5197a19cd2084d::t_5e954998cb6c57 1-111
+sw.js
+  s_5197a19cd2084d::t_e9e405e90e9ee3 1-34
+vendor/jspdf.umd.min.js
+  s_5197a19cd2084d::t_f76d80fe273f97 1-398
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "afd04e9a62ca34c3a9c30533d0f7b057097df8bd",
+  "prompts": {},
+  "sessions": {
+    "s_5197a19cd2084d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4143a115-42aa-41d6-a0a7-4999486a5e51",
+        "model": "unknown"
+      },
+      "human_author": "Federico Irrazabal <federico@toteat.com>"
+    }
+  }
+}
