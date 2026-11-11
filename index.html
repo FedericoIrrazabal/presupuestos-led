@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b0b">
+  <meta name="color-scheme" content="dark">
+  <title>Presupuestos MR</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="preload" href="fonts/montserrat-extrabold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8M21 3v5h-5"/></symbol>
+  </svg>
+
+  <header class="bar">
+    <button id="back" class="icon-btn" hidden aria-label="Volver a la lista"><svg><use href="#i-back"/></svg></button>
+    <img id="brand" class="logo" src="logo-dark.png" alt="MR Pantallas LED Profesional">
+    <h1 id="screen-title" hidden></h1>
+    <span class="spacer" id="brand-spacer"></span>
+    <span id="save-status" class="save-status" role="status" aria-live="polite" hidden>Guardado</span>
+    <button id="open-issuer" class="icon-btn" aria-label="Mis datos"><svg><use href="#i-gear"/></svg></button>
+  </header>
+
+  <main>
+    <section id="list-screen">
+      <h1 class="section-title">Presupuestos</h1>
+      <div id="issuer-missing" class="notice" hidden>
+        <p>Cargá tu nombre, CUIT y contacto para que salgan en el encabezado del PDF.</p>
+        <button id="issuer-missing-btn" class="primary" type="button">Cargar mis datos</button>
+      </div>
+      <ul id="budget-list"></ul>
+      <div id="empty" class="empty">
+        <div class="grid" aria-hidden="true"></div>
+        <strong>Todavía no hay presupuestos</strong>
+        Creá el primero con el botón de abajo.
+      </div>
+    </section>
+
+    <section id="edit-screen" hidden>
+      <h2 class="section-title">Evento</h2>
+      <label>Nombre del evento <input id="f-event" name="event" autocomplete="off" placeholder="Fiesta Nacional del Sol"></label>
+      <label>Días <input id="f-days" name="days" autocomplete="off" placeholder="20, 21 y 22 de Noviembre de 2.026 (Armado 17/11).-"></label>
+      <label>Título de sección <input id="f-section" name="section" autocomplete="off" placeholder="SET DE TELEVISIÓN"></label>
+
+      <h2 class="section-title">Ítems</h2>
+      <ol id="items"></ol>
+      <button id="add-item" class="wide ghost" type="button">+ Agregar ítem</button>
+
+      <h2 class="section-title">Total</h2>
+      <label>Monto en pesos
+        <input id="f-total" name="total" class="amount" inputmode="numeric" autocomplete="off" placeholder="$ 0">
+      </label>
+      <div class="field">
+        <label for="f-words">En letras</label>
+        <div class="row">
+          <input id="f-words" name="words" autocomplete="off" placeholder="Veinticuatro Millones" aria-describedby="words-hint words-warning">
+          <button id="regen-words" class="icon-btn boxed" type="button" aria-label="Recalcular en letras desde el monto"><svg><use href="#i-refresh"/></svg></button>
+        </div>
+        <p id="words-hint" class="hint">Se completa solo con el monto. Si lo editás, ↻ lo recalcula.</p>
+        <p id="words-warning" class="warning" role="status" hidden></p>
+      </div>
+
+      <h2 class="section-title">Cierre</h2>
+      <label>Lugar y fecha <input id="f-closing" name="closing" autocomplete="off"></label>
+
+      <div class="secondary-actions">
+        <button id="duplicate" type="button">Duplicar</button>
+        <button id="delete" class="danger" type="button">Eliminar</button>
+      </div>
+    </section>
+  </main>
+
+  <nav id="list-bar" class="action-bar">
+    <button id="new-budget" class="primary" type="button">+ Nuevo presupuesto</button>
+  </nav>
+  <nav id="edit-bar" class="action-bar" hidden>
+    <button id="download-pdf" type="button" aria-label="Descargar PDF"><svg aria-hidden="true"><use href="#i-download"/></svg><span class="label">Descargar</span></button>
+    <button id="share-pdf" class="primary" type="button"><svg aria-hidden="true"><use href="#i-share"/></svg>Compartir PDF</button>
+  </nav>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="issuer-dialog" aria-labelledby="issuer-title">
+    <form method="dialog">
+      <h2 id="issuer-title" class="section-title">Mis datos</h2>
+      <label>Nombre <input name="name" autocomplete="name"></label>
+      <label>CUIT <input name="cuit" inputmode="numeric" autocomplete="off"></label>
+      <label>Email <input name="email" type="email" autocomplete="email"></label>
+      <label>Teléfono <input name="phone" type="tel" autocomplete="tel"></label>
+      <label>Ciudad (para la fecha) <input name="city" autocomplete="address-level2"></label>
+      <div class="actions">
+        <button type="button" id="cancel-issuer" class="ghost">Cancelar</button>
+        <button value="save" class="primary">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="vendor/jspdf.umd.min.js"></script>
+  <script src="numero-a-letras.js"></script>
+  <script src="pdf.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
