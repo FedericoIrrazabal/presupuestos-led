@@ -194,3 +194,129 @@ Los casos se corren en Chrome con el MCP, a 390×844 y con touch. Los marcados `
 **Siguen pendientes:** UI-06 (necesita un teléfono real).
 
 **2026-11-11, en el teléfono:** PD-07 da Pass. El usuario instaló la PWA desde https://federicoirrazabal.github.io/presupuestos-led/ y compartió el PDF a WhatsApp sin problemas.
+
+### Casos nuevos y a re-correr · descripción, datos del emisor, firma y DNI · 2026-11-12
+
+Commits `9b55cd6..8eaa920` sobre `main`:
+- favicon;
+- campo «Descripción» en el presupuesto, que se imprime después de Días;
+- en Mis datos, «N° de proveedor del Estado» y «Dirección», que van al encabezado;
+- «Firma» en cursiva Allura, con vista previa, y bloque de firma al pie del PDF (firma, NOMBRE, D.N.I Nº, Teléfono);
+- DNI deducido de los 8 dígitos centrales del CUIT: editable, sigue al CUIT mientras no se escriba otro, y el PDF usa el deducido si el DNI queda vacío.
+
+**Oráculo nuevo:**
+- **Claims-PDF2**: el PDF de ejemplo `Presupuesto (1).pdf`, con P. Estado Nº, «Descripción:» y la firma cursiva con nombre, DNI y teléfono debajo, a la derecha.
+- **Claims-USR**: pedidos del usuario del 2026-11-12: «el DNI se tiene que deducir del CUIT, pero tiene que seguir siendo campo editable».
+
+Clases que dejaron escapar los planes anteriores, aplicadas acá:
+- H-14: nombre accesible de cada input nuevo.
+- H-15: axe best-practice en cada pantalla.
+- H-16: texto oculto que se sigue leyendo.
+
+Todo `sin datos`: corre en el contexto aislado del MCP con prefijo `QA-R3`.
+
+**Nuevos:**
+
+| ID | Área | Caso | Resultado esperado | Estado | Notas |
+|---|---|---|---|---|---|
+| ED-08 | Editor | Escribir una descripción de 3 líneas, recargar y reabrir | Después de recargar, `localStorage` tiene `description` con el texto exacto. El textarea abre con la altura del contenido, sin scroll interno (`scrollHeight` = `clientHeight`). | Pass | P1 · Purpose (no perder datos) · diff `fields` + `fitTextarea` |
+| ED-09 | Editor | Presupuesto guardado antes del cambio, sin la clave `description` | El campo abre vacío (no «undefined») y el PDF sale sin el bloque «Descripción:». Al escribir se guarda la clave. | Pass | P2 · **Robustez** (migración) · sembrar un presupuesto sin `description` |
+| ED-10 | Editor | Descripción con saltos de línea (Enter), emoji y 1.500 caracteres | El emoji se quita al tipear, con toast. En el PDF se respetan los saltos de línea. Si no entra, pasa a otra página sin pisar el total ni la firma, y nada se sale de los márgenes (x máxima ≤ 533 pt). | Pass | P2 · ataques strings largos y multilínea |
+| PD-08 | PDF | Encabezado con todos los datos del emisor, y después con N° de proveedor y dirección vacíos | Con datos: el orden es nombre, «C.U.I.T.: …», «P. Estado Nº 78101», dirección, mail y «Teléfono: …» (Claims-PDF2). Vacíos: esas líneas no aparecen y no queda una línea en blanco. | Pass | P2 · Claims-PDF2 |
+| PD-09 | PDF | Bloque de firma completo | Abajo a la derecha, después de lugar y fecha: la firma en cursiva (fuente `Allura` embebida en el PDF), y debajo NOMBRE en mayúsculas, «D.N.I Nº 42.917.638» y «Teléfono: …», centrados entre sí y dentro de la hoja. | Pass | P1 · Claims-PDF2 |
+| PD-10 | PDF | Variantes: sin firma pero con nombre; sin nada en Mis datos | Sin firma, solo las líneas de texto, sin un hueco donde iría la cursiva. Sin datos, no hay bloque de firma. | Pass | P2 · null |
+| PD-11 | PDF | Firma de 45 caracteres y nombre de 60 | Ningún texto del bloque de firma se pasa del borde derecho de la hoja (595 pt) ni del margen derecho (533 pt). | Falla | P2 · ataque strings largos · el bloque se centra a 32 mm del margen derecho y no se corta en líneas |
+| PD-12 | PDF | Firma con «Ñañez Peña», tildes y «ü» | La cursiva muestra ñ, tildes y ü (están en el subconjunto Latin-1 de Allura), sin cuadritos ni letras espaciadas. | Falla | P2 · clase H-09 (glifos) |
+| PD-13 | PDF | Presupuesto largo, con el bloque de firma cerca del pie | El bloque de firma pasa entero a la página siguiente, sin partirse entre dos páginas. | Pass | P2 · ataque posición · 22 ítems para que el cierre quede cerca de los 280 mm |
+| DA-05 | Mis datos | Cargar N° de proveedor, dirección, firma y DNI, guardar y recargar | Después de recargar, `presupuestos.issuer` tiene los 4 valores, el diálogo los muestra y el PDF los usa. | Pass | P1 · Purpose |
+| DA-06 | Mis datos | Datos guardados antes del cambio (sin las claves nuevas) | El diálogo muestra los campos nuevos vacíos (no «undefined»). Si el CUIT guardado es válido, el DNI aparece ya deducido al abrir. | Pass | P2 · **Robustez** (migración) · sembrar `presupuestos.issuer` con 5 claves |
+| DA-07 | Mis datos | Tabla CUIT → DNI: «27-42917638-2», «27429176382», «27 42917638 2», «20-08123456-7», «27-4291» (incompleto), «274291763821» (12 dígitos), «abc» | 42.917.638 · 42.917.638 · 42.917.638 · 8.123.456 · vacío · vacío · vacío | Pass | P2 · Claims-USR · dato que va al PDF |
+| DA-08 | Mis datos | DNI escrito a mano, cambio de CUIT, y después borrar el DNI y cambiar el CUIT | El DNI manual se mantiene al cambiar el CUIT. Con el DNI borrado, vuelve a seguir al CUIT. | Pass | P2 · Claims-USR («tiene que seguir siendo editable») |
+| DA-09 | Mis datos | Abrir, cambiar el CUIT (el DNI se autocompleta) y cerrar con Cancelar y con Esc | No se guarda nada: `presupuestos.issuer` no cambia, ni CUIT ni DNI. Al reabrir aparecen los valores guardados. | Pass | P2 · regresión de la clase DA-01 en un diálogo que ahora autocompleta |
+| DA-10 | Mis datos | Guardar con el DNI vacío y CUIT válido; y con el DNI vacío y CUIT inválido | Con CUIT válido, el PDF dice «D.N.I Nº» con el DNI deducido. Con CUIT inválido, no hay línea de DNI y no aparece «D.N.I Nº » suelto. | Pass | P2 · null |
+| DA-11 | Mis datos | Vista previa de la firma | Se actualiza al tipear y se ve en Allura cargada (`document.fonts.check`). Vacía muestra «Así se verá tu firma» en gris. Un emoji se quita del input y de la vista previa. | Pass | P3 · Claims-USR («esa tipografía cursiva») |
+| UI-07 | Accesibilidad | Diálogo con los campos nuevos y editor con la descripción | axe (wcag2a/aa y best-practice) da 0 violaciones en el diálogo y el editor. Nombres accesibles exactos: «N° de proveedor del Estado», «Dirección», «Firma (se escribe en cursiva)», «DNI» (la ayuda va como descripción, no en el nombre), «Descripción». La vista previa queda fuera del árbol (`aria-hidden`). | Pass | P2 · clases H-14 y H-15 |
+| UI-08 | Presentación | Diálogo a 320×568 y a 390×844 | El diálogo scrollea, Guardar y Cancelar quedan alcanzables, no hay scroll horizontal y la vista previa de una firma larga no desborda (hace ellipsis). | Pass | P2 · el diálogo creció ~60 % |
+| UI-09 | Accesibilidad | Contraste de lo nuevo | Placeholder de la vista previa `#767676` sobre `#fff` ≥ 4,5:1; la firma `#0b0b0b` sobre blanco ≥ 4,5:1; el hint del DNI ≥ 4,5:1 sobre el fondo del diálogo. | Pass | P3 · Statutes-WCAG |
+| OF-04 | Offline | Con el servidor apagado: abrir Mis datos y generar un PDF con firma | La vista previa se ve en cursiva y el PDF tiene la fuente `Allura` (`allura.ttf` y `allura.woff2` están en `SHELL`, caché `presupuestos-v10`). | Pass | P1 · Claims-USR (se usa en eventos sin señal) · apagar el `http.server` y verificar con `curl` (lección de R1) |
+| FV-01 | Favicon | Íconos de la pestaña | Los 3 `<link rel="icon">` responden 200 con su tamaño real (16, 32 y `.ico` 16/32/48) y también con el servidor apagado. | Pass | P3 · pedido del usuario del 2026-11-11 |
+
+**A re-correr** (su expectativa no cambió):
+
+| ID | Clase | Por qué | Estado |
+|---|---|---|---|
+| PD-01 | Recent | El encabezado y el final de `buildPdf` cambiaron. Debe seguir en una hoja con datos completos de emisor y firma. | Falla |
+| PD-05 | Repaired | `FONTS` suma `allura.ttf`. Bloquear solo ese archivo debe dar el toast y recuperarse sin recargar (H-04). | Pass |
+| IT-06 | Recent | Paginación: ahora hay un bloque más al final (firma). | Pass |
+| ED-01 | Core | El mapa `fields` cambió: los 5 campos y los ítems deben persistir. | Pass |
+| ED-03 | Recent | Duplicar debe copiar la descripción, y editarla en la copia no debe tocar el original. | Pass |
+| DA-01 · DA-02 | Recent | El diálogo cambió: Esc, Cancelar y Enter con los campos nuevos. | Pass |
+| UI-05 | Recent | El editor es más largo: el último control debe seguir quedando por encima de la barra. | Pass |
+
+**No se re-corre:**
+- LI, TO e IT-01 a IT-05: el diff no toca la lista, los montos ni los ítems.
+- ED-02 y ED-04 a ED-07, PD-02 a PD-04, PD-06 y PD-07: el historial, el guardado, la limpieza de texto y el share no cambiaron.
+- UI-01 a UI-04: lo reemplazan UI-07 a UI-09.
+- OF-01 a OF-03: los reemplaza OF-04.
+
+**Cubierto por tests:** nada; el usuario pidió no sumar e2e.
+
+**Si sólo alcanza para 5:** OF-04, PD-09, DA-05, ED-08, DA-07.
+
+**Preguntas abiertas al producto:**
+1. Un CUIT de empresa (30-, 33- o 34-) no tiene DNI, y la deducción igual inventa uno. ¿Se deduce solo para 20-, 23-, 24- y 27-?
+2. En el ejemplo, el encabezado tiene dos teléfonos y la firma uno solo. ¿Hace falta un «Teléfono de la firma» aparte?
+
+## Ronda 3 · 2026-11-12 · descripción, emisor, firma y DNI · MCP chrome-devtools
+
+**R3: 25 Pass · 3 Falla (PD-01, PD-11, PD-12), de un total de 28 · después de los arreglos, los 3 re-verificados en Pass.** ED-08 pasó su esperado de persistencia, pero dejó H-19.
+
+**Entorno:**
+- `python3 -m http.server 8765` sobre `8eaa920` más los arreglos de esta ronda.
+- Contexto aislado `qa-r3` en 390×844 y 320×568.
+- Datos sembrados con `initScript`: un emisor viejo de 5 claves y un presupuesto sin `description`. Los datos de prueba llevan el prefijo `QA-R3`.
+- El texto de los PDF se extrajo con PyMuPDF. Los textos en Montserrat van codificados dentro del PDF, así que buscar la cadena en `doc.output()` no puede dar positivo: el primer chequeo de ED-09 se descartó por eso.
+
+| ID | Evidencia R3 |
+|---|---|
+| ED-08 | Después de recargar, `description` coincide en `localStorage` y en el campo. La altura quedó en `scrollHeight` 117 / `clientHeight` 115, 2px corta (→ H-19); después del arreglo, 117/117 y 140/140 al tipear. |
+| ED-09 | El presupuesto sembrado sin la clave abre el campo en `""`. El texto extraído del PDF no tiene «Descripción:». Al escribir se guarda «agregada». |
+| ED-10 | 2 páginas; los saltos de línea se respetan (captura mirada); x máxima 533. El emoji se quita al tipear (mismo mecanismo que DA-11). |
+| PD-08 | Con datos: «P. Estado Nº 78101» y la dirección en el encabezado. Vacíos: no hay línea de «Estado» en el texto extraído. |
+| PD-09 | Span en fuente `Allura` de 26 pt, «Celeste Irrazabal», y debajo NOMBRE, «D.N.I Nº 42.917.638» y «Teléfono: …» (captura mirada). |
+| PD-10 | Sin firma: no hay span Allura y las líneas siguen. Sin datos: no hay DNI ni Allura. |
+| PD-11 | Firma de 45 caracteres: x1 = 611 sobre una hoja de 595 (→ H-18). Después del arreglo: 16 pt, x 236–494; máximo 535 (rebaba del glifo, igual que R1). |
+| PD-12 | ñ, tildes y ü salen bien en cursiva (captura mirada), pero x1 = 558 pasa el margen de 533 (→ H-18). Después del arreglo: x 301–533. |
+| PD-13 | El bloque entero pasa a la pág. 2 y no se parte. Después del arreglo de H-17, la pág. 2 tiene cierre 136–142 mm y firma 149–171 mm. |
+| DA-05 | Después de recargar, `presupuestos.issuer` tiene `providerNumber` 78101, `address`, `signature` y `dni`, y el diálogo los muestra. |
+| DA-06 | Con el emisor sembrado de 5 claves, los campos nuevos abren en `""` y el DNI en «42.917.638», deducido al abrir. |
+| DA-07 | 42.917.638 · 42.917.638 · 42.917.638 · 8.123.456 · vacío · vacío · vacío. |
+| DA-08 | El DNI escrito a mano (11.111.111) se mantiene al cambiar el CUIT. Con el DNI borrado, vuelve a 42.917.638. |
+| DA-09 | Con Cancelar, `presupuestos.issuer` queda idéntico. Con Esc, el diálogo se cierra y el storage no cambia (sigue el emisor viejo). |
+| DA-10 | DNI vacío y CUIT válido: «D.N.I Nº 42.917.638». DNI vacío y CUIT «27-4291»: no hay línea de DNI. |
+| DA-11 | Vacía: «Así se verá tu firma» en `rgb(118,118,118)`. Con texto: Allura cargada; «🖊️» se quita del input y aparece el toast. |
+| UI-07 | axe 4.10.2 da 0 violaciones y 0 incompletos en el editor y en el diálogo. En el snapshot, los textbox se llaman «N° de proveedor del Estado», «Dirección», «Firma (se escribe en cursiva)» y «DNI» (con la ayuda como descripción). Los encabezados quedan en h2 «MIS DATOS» y h3 «FIRMA». La vista previa tiene `aria-hidden="true"` y la descripción del editor se llama «Descripción». |
+| UI-08 | A 320×568, el diálogo scrollea y Guardar queda visible. `scrollWidth` 320. La vista previa larga hace ellipsis (captura mirada). |
+| UI-09 | Placeholder de la vista previa 4,54:1, firma 19,68:1, hint del DNI 7,8:1. |
+| OF-04 | Con el servidor apagado (`curl` da 000): vista previa en Allura y PDF de 1 página con `/BaseFont /Allura`. El favicon responde 200 desde la caché. |
+| FV-01 | `favicon.ico` 200 48×48, `favicon-32` 200 32×32 y `favicon-16` 200 16×16; los 5 assets nuevos están en la caché `presupuestos-v10`. |
+| PD-01 | Con los datos del emisor completos, el docx sale en 2 páginas, con la firma sola en la 2ª (→ H-17). Después del arreglo: 1 página, cierre en 245–250 mm y firma en 257–280 mm (captura mirada). |
+| PD-05 | Primer intento descartado: la promesa de las fuentes ya estaba cargada, así que el bloqueo no podía fallar. Con `fontDataPromise` vaciada y `allura.ttf` bloqueado: toast «No se pudo generar el PDF: Failed to fetch» y 0 descargas. Al desbloquear, 1 descarga sin recargar. |
+| IT-06 | 25 ítems dan 3 páginas, con la firma entera en la pág. 3. |
+| ED-01 · ED-03 | Persisten los 5 campos. Duplicar copia la descripción; editar la copia deja el original intacto; eliminar la copia la saca del storage. |
+| DA-01 · DA-02 | Con el teclado real: Esc no guarda (DA-09) y Enter guarda, con el toast «Datos guardados». |
+| UI-05 | A 320×568, Eliminar termina en 472 y la barra empieza en 495. |
+
+**Hallazgos de R3**
+
+| ID | Caso | Sev. | Síntoma | Causa raíz | Resolución | Regresión | Previsto | Estado | Detectado |
+|---|---|---|---|---|---|---|---|---|---|
+| H-17 | PD-01 | P2 | Con los datos del emisor completos, el presupuesto del docx pasa a 2 páginas y la firma queda sola en la 2ª. | El bloque reservaba 20 mm de espacio más 32 mm fijos, contra un límite de 280 mm. | El alto se calcula según las líneas reales (7 mm de firma + 4,2 mm por línea), con 10 mm de espacio y límite a 10 mm del borde. | n/a: el usuario pidió no sumar e2e | sí (re-corrida Recent) | Arreglado (sin commitear) · re-verificado en R3 | R3 · 2026-11-12 |
+| H-18 | PD-11 · PD-12 | P2 | Una firma larga se sale de la hoja (x 611 > 595), y una de 22 letras pasa el margen derecho. | El bloque se centraba siempre a 32 mm del margen, sin medir el ancho. | La firma se achica hasta el 60 % del ancho útil (mínimo 14 pt) y el centro se corre a la izquierda según el ancho del bloque. | n/a | sí | Arreglado (sin commitear) · re-verificado en R3 | R3 |
+| H-19 | ED-08 | P3 | El textarea de la descripción queda 2px más bajo que el texto y corta la última línea. | `fitTextarea` usaba `scrollHeight`, que no incluye los bordes, con `box-sizing: border-box`. Los ítems no lo mostraban porque no tienen borde. | Suma `offsetHeight - clientHeight`. | n/a | sí | Arreglado (sin commitear) · re-verificado en R3 | R3 |
+
+**Lecciones de R3** (para `/qa-case-design`):
+- Un negativo sobre el binario del PDF no vale con fuentes embebidas: extraer el texto.
+- Un bloqueo de red no prueba nada si el recurso ya está cacheado en memoria: vaciar la caché antes.
+
+**Preguntas abiertas al producto:** las dos de la sección de casos (CUIT de empresa y teléfono de la firma).

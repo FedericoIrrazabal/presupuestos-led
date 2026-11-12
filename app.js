@@ -287,9 +287,10 @@ function renderItems() {
   });
 }
 
+// scrollHeight excludes borders, so they are added back or the last line gets clipped.
 function fitTextarea(area) {
   area.style.height = 'auto';
-  area.style.height = area.scrollHeight + 'px';
+  area.style.height = area.scrollHeight + area.offsetHeight - area.clientHeight + 'px';
 }
 
 function swapItems(a, b) {

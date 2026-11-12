@@ -1,4 +1,4 @@
-const CACHE = 'presupuestos-v10';
+const CACHE = 'presupuestos-v11';
 const SHELL = [
   './',
   './index.html',

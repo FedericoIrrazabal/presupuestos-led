@@ -228,16 +228,30 @@ async function buildPdf(rawBudget, rawIssuer) {
     issuer.phone && 'Teléfono: ' + issuer.phone,
   ].filter(Boolean);
   if (issuer.signature || signatureLines.length) {
-    const blockHeight = 32;
-    y += 20;
-    if (y + blockHeight > PAGE.bottom) {
+    // The signature shrinks to fit, and the block shifts left so nothing crosses the right margin.
+    let signatureSize = 26;
+    doc.setFont('Allura', 'normal');
+    doc.setFontSize(signatureSize);
+    while (issuer.signature && signatureSize > 14 && doc.getTextWidth(issuer.signature) > CONTENT_WIDTH * 0.6) {
+      signatureSize -= 1;
+      doc.setFontSize(signatureSize);
+    }
+    const signatureWidth = issuer.signature ? doc.getTextWidth(issuer.signature) : 0;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    const linesWidth = Math.max(0, ...signatureLines.map((line) => doc.getTextWidth(line)));
+    const blockWidth = Math.max(signatureWidth, linesWidth);
+    const centerX = Math.min(PAGE.width - PAGE.right - 32, PAGE.width - PAGE.right - blockWidth / 2);
+
+    const blockHeight = (issuer.signature ? 7 : 0) + signatureLines.length * 4.2;
+    y += 10;
+    if (y + blockHeight > PAGE.height - 10) {
       doc.addPage();
       y = 40;
     }
-    const centerX = PAGE.width - PAGE.right - 32;
     if (issuer.signature) {
       doc.setFont('Allura', 'normal');
-      doc.setFontSize(26);
+      doc.setFontSize(signatureSize);
       doc.text(issuer.signature, centerX, y, { align: 'center' });
       y += 6;
     }
