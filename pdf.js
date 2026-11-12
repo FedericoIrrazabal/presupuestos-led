@@ -37,11 +37,38 @@ function toPdfText(text) {
     .replace(/ {2,}/g, ' ');
 }
 
-// A CUIT is <type>-<DNI>-<check digit>, so the 8 middle digits are the DNI.
+const CUIT_WEIGHTS = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+const PERSON_CUIT_PREFIXES = ['20', '23', '24', '25', '26', '27'];
+const COMPANY_CUIT_PREFIXES = ['30', '33', '34'];
+
+const cuitDigits = (cuit) => String(cuit ?? '').replace(/\D/g, '');
+
+// Formats while typing too: "2040592" → "20-40592", "20405928273" → "20-40592827-3".
+function formatCuit(cuit) {
+  const d = cuitDigits(cuit).slice(0, 11);
+  return [d.slice(0, 2), d.slice(2, 10), d.slice(10)].filter(Boolean).join('-');
+}
+
+// Módulo 11 with weights 5,4,3,2,7,6,5,4,3,2; a result of 11 means 0 and 10 means the number cannot exist.
+function cuitError(cuit) {
+  const d = cuitDigits(cuit);
+  if (d.length === 0) return '';
+  if (d.length !== 11) return `Faltan dígitos: el CUIT tiene 11 y escribiste ${d.length}.`;
+  const prefix = d.slice(0, 2);
+  if (![...PERSON_CUIT_PREFIXES, ...COMPANY_CUIT_PREFIXES].includes(prefix)) {
+    return 'El CUIT tiene que empezar con 20, 23, 24, 27 (personas) o 30, 33, 34 (empresas).';
+  }
+  const sum = CUIT_WEIGHTS.reduce((acc, weight, i) => acc + weight * Number(d[i]), 0);
+  const expected = (11 - (sum % 11)) % 11;
+  if (expected === 10 || expected !== Number(d[10])) return 'El CUIT no es válido: revisá los números, el último dígito no coincide.';
+  return '';
+}
+
+// A person's CUIT is <type>-<DNI>-<check digit>, so the 8 middle digits are the DNI; companies have none.
 function dniFromCuit(cuit) {
-  const digits = String(cuit ?? '').replace(/\D/g, '');
-  if (digits.length !== 11) return '';
-  return Number(digits.slice(2, 10)).toLocaleString('es-AR');
+  const d = cuitDigits(cuit);
+  if (d.length !== 11 || !PERSON_CUIT_PREFIXES.includes(d.slice(0, 2))) return '';
+  return Number(d.slice(2, 10)).toLocaleString('es-AR');
 }
 
 function isPrintableItem(item) {
@@ -111,11 +138,11 @@ async function buildPdf(rawBudget, rawIssuer) {
   doc.setTextColor(...MUTED);
   const headerLines = [
     issuer.name,
-    issuer.cuit && 'C.U.I.T.: ' + issuer.cuit,
+    issuer.cuit && 'C.U.I.T.: ' + formatCuit(issuer.cuit),
     issuer.providerNumber && 'P. Estado Nº ' + issuer.providerNumber,
     issuer.address,
     issuer.email,
-    issuer.phone && 'Teléfono: ' + issuer.phone,
+    (issuer.phone || issuer.phone2) && 'Teléfono: ' + [issuer.phone, issuer.phone2].filter(Boolean).join(' - '),
   ].filter(Boolean);
   for (const line of headerLines) {
     doc.text(line, PAGE.left, y);
@@ -225,7 +252,7 @@ async function buildPdf(rawBudget, rawIssuer) {
   const signatureLines = [
     issuer.name && issuer.name.toUpperCase(),
     (issuer.dni || dniFromCuit(issuer.cuit)) && 'D.N.I Nº ' + (issuer.dni || dniFromCuit(issuer.cuit)),
-    issuer.phone && 'Teléfono: ' + issuer.phone,
+    (issuer.phone || issuer.phone2) && 'Teléfono: ' + (issuer.phone || issuer.phone2),
   ].filter(Boolean);
   if (issuer.signature || signatureLines.length) {
     // The signature shrinks to fit, and the block shifts left so nothing crosses the right margin.

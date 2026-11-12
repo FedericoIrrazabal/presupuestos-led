@@ -4,7 +4,7 @@ const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 
 const MAX_AMOUNT = 999_999_999_999_999;
 
 // Personal data is never shipped in the code: each phone loads it once from «Mis datos».
-const DEFAULT_ISSUER = { name: '', cuit: '', providerNumber: '', address: '', email: '', phone: '', city: '', signature: '', dni: '' };
+const DEFAULT_ISSUER = { name: '', cuit: '', providerNumber: '', address: '', email: '', phone: '', phone2: '', city: '', signature: '', dni: '' };
 
 const $ = (id) => document.getElementById(id);
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -432,10 +432,32 @@ function syncDniFromCuit() {
   if (!dniInput.value.trim() || dniInput.value.trim() === derivedDni) dniInput.value = next;
   derivedDni = next;
 }
-cuitInput.addEventListener('input', syncDniFromCuit);
+
+function showCuitError(message) {
+  const error = $('cuit-error');
+  error.textContent = message;
+  error.hidden = !message;
+  if (message) cuitInput.setAttribute('aria-invalid', 'true');
+  else cuitInput.removeAttribute('aria-invalid');
+}
+
+// Typed digits get their dashes as they go, because the numeric keypad on phones has no "-".
+cuitInput.addEventListener('input', () => {
+  cuitInput.value = formatCuit(cuitInput.value);
+  const error = cuitError(cuitInput.value);
+  cuitInput.setCustomValidity(error);
+  if (!error || cuitDigits(cuitInput.value).length === 11) showCuitError(error);
+  else showCuitError('');
+  syncDniFromCuit();
+});
+cuitInput.addEventListener('blur', () => showCuitError(cuitError(cuitInput.value)));
+cuitInput.addEventListener('invalid', () => showCuitError(cuitError(cuitInput.value)));
 
 function openIssuerDialog() {
   for (const input of issuerDialog.querySelectorAll('input')) input.value = issuer[input.name] ?? '';
+  cuitInput.value = formatCuit(cuitInput.value);
+  cuitInput.setCustomValidity(cuitError(cuitInput.value));
+  showCuitError('');
   derivedDni = dniFromCuit(cuitInput.value);
   if (!dniInput.value.trim()) dniInput.value = derivedDni;
   updateSignaturePreview();

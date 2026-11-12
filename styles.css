@@ -222,6 +222,9 @@ dialog .actions button { flex: 1; }
 }
 .signature-preview.empty { color: #767676; }
 .dni-hint { margin: -8px 0 14px; }
+.field-hint { margin: -8px 0 14px; }
+.field-error { margin: -8px 0 14px; font-size: .85rem; color: var(--danger); }
+input[aria-invalid="true"] { border-color: var(--danger); }
 
 /* ---------- Toast ---------- */
 .toast {

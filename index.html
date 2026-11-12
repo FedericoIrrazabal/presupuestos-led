@@ -99,11 +99,14 @@
     <form method="dialog">
       <h2 id="issuer-title" class="section-title">Mis datos</h2>
       <label>Nombre <input name="name" autocomplete="name"></label>
-      <label>CUIT <input name="cuit" inputmode="numeric" autocomplete="off"></label>
+      <label>CUIT <input name="cuit" inputmode="numeric" autocomplete="off" placeholder="20-40592827-3" maxlength="13" aria-describedby="cuit-error"></label>
+      <p id="cuit-error" class="field-error" role="alert" hidden></p>
       <label>N° de proveedor del Estado <input name="providerNumber" inputmode="numeric" autocomplete="off" placeholder="78101"></label>
       <label>Dirección <input name="address" autocomplete="street-address"></label>
       <label>Email <input name="email" type="email" autocomplete="email"></label>
-      <label>Teléfono <input name="phone" type="tel" autocomplete="tel"></label>
+      <label>Teléfono <input name="phone" type="tel" autocomplete="tel" placeholder="2644681405"></label>
+      <label>Otro teléfono (opcional) <input name="phone2" type="tel" autocomplete="off" placeholder="2644366628" aria-describedby="phone2-hint"></label>
+      <p id="phone2-hint" class="hint field-hint">En el encabezado del PDF sale «Teléfono: 2644681405 - 2644366628»; en la firma va solo el primero.</p>
       <label>Ciudad (para la fecha) <input name="city" autocomplete="address-level2"></label>
 
       <h3 class="section-title">Firma</h3>
