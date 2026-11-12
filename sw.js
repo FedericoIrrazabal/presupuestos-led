@@ -1,4 +1,4 @@
-const CACHE = 'presupuestos-v8';
+const CACHE = 'presupuestos-v9';
 const SHELL = [
   './',
   './index.html',
@@ -12,6 +12,8 @@ const SHELL = [
   './fonts/montserrat-semibold.woff2',
   './fonts/montserrat-extrabold.ttf',
   './fonts/montserrat-semibold.ttf',
+  './fonts/allura.ttf',
+  './fonts/allura.woff2',
   './manifest.webmanifest',
   './vendor/jspdf.umd.min.js',
   './icons/icon-192.png',

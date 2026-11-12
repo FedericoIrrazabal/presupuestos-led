@@ -5,6 +5,11 @@
   src: url('fonts/montserrat-extrabold.woff2') format('woff2');
 }
 @font-face {
+  font-family: 'Allura';
+  font-display: swap;
+  src: url('fonts/allura.woff2') format('woff2');
+}
+@font-face {
   font-family: 'Montserrat';
   font-weight: 600;
   font-display: swap;
@@ -209,6 +214,13 @@ dialog {
 dialog::backdrop { background: rgb(0 0 0 / .7); }
 dialog .actions { display: flex; gap: 10px; margin-top: 8px; }
 dialog .actions button { flex: 1; }
+.signature-preview {
+  margin: -4px 0 14px; padding: 10px 14px; min-height: 64px;
+  font: 2.1rem/1.4 'Allura', cursive; color: var(--black);
+  background: #ffffff; border-radius: 12px; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.signature-preview.empty { color: #767676; }
 
 /* ---------- Toast ---------- */
 .toast {

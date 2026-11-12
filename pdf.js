@@ -6,6 +6,7 @@ const MUTED = [90, 90, 90];
 const FONTS = [
   { file: 'fonts/montserrat-extrabold.ttf', name: 'Montserrat', style: 'extrabold' },
   { file: 'fonts/montserrat-semibold.ttf', name: 'Montserrat', style: 'semibold' },
+  { file: 'fonts/allura.ttf', name: 'Allura', style: 'normal' },
 ];
 
 function loadImage(src) {
@@ -104,6 +105,8 @@ async function buildPdf(rawBudget, rawIssuer) {
   const headerLines = [
     issuer.name,
     issuer.cuit && 'C.U.I.T.: ' + issuer.cuit,
+    issuer.providerNumber && 'P. Estado Nº ' + issuer.providerNumber,
+    issuer.address,
     issuer.email,
     issuer.phone && 'Teléfono: ' + issuer.phone,
   ].filter(Boolean);
@@ -136,6 +139,25 @@ async function buildPdf(rawBudget, rawIssuer) {
   };
   labeled('Evento:', event && `“${event}”`);
   labeled('Días:', budget.days);
+
+  if (budget.description?.trim()) {
+    doc.setFont('Montserrat', 'extrabold');
+    doc.setFontSize(11);
+    doc.text('Descripción:', PAGE.left, y);
+    y += 7;
+    doc.setFont('helvetica', 'normal');
+    const descriptionX = PAGE.left + 5;
+    const descriptionLines = doc.splitTextToSize(budget.description.trim(), PAGE.width - PAGE.right - descriptionX);
+    for (const line of descriptionLines) {
+      if (y > PAGE.bottom) {
+        doc.addPage();
+        y = 25;
+      }
+      doc.text(line, descriptionX, y);
+      y += 5;
+    }
+    y += 6;
+  }
 
   if (budget.section) {
     doc.setFont('Montserrat', 'extrabold');
@@ -190,6 +212,35 @@ async function buildPdf(rawBudget, rawIssuer) {
       y = 25;
     }
     doc.text(closingLines, PAGE.width - PAGE.right, y, { align: 'right' });
+    y += closingLines.length * 5.5;
+  }
+
+  const signatureLines = [
+    issuer.name && issuer.name.toUpperCase(),
+    issuer.dni && 'D.N.I Nº ' + issuer.dni,
+    issuer.phone && 'Teléfono: ' + issuer.phone,
+  ].filter(Boolean);
+  if (issuer.signature || signatureLines.length) {
+    const blockHeight = 32;
+    y += 20;
+    if (y + blockHeight > PAGE.bottom) {
+      doc.addPage();
+      y = 40;
+    }
+    const centerX = PAGE.width - PAGE.right - 32;
+    if (issuer.signature) {
+      doc.setFont('Allura', 'normal');
+      doc.setFontSize(26);
+      doc.text(issuer.signature, centerX, y, { align: 'center' });
+      y += 6;
+    }
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...INK);
+    for (const line of signatureLines) {
+      doc.text(line, centerX, y, { align: 'center' });
+      y += 4.2;
+    }
   }
 
   return doc;

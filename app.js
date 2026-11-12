@@ -4,7 +4,7 @@ const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 
 const MAX_AMOUNT = 999_999_999_999_999;
 
 // Personal data is never shipped in the code: each phone loads it once from «Mis datos».
-const DEFAULT_ISSUER = { name: '', cuit: '', email: '', phone: '', city: '' };
+const DEFAULT_ISSUER = { name: '', cuit: '', providerNumber: '', address: '', email: '', phone: '', city: '', signature: '', dni: '' };
 
 const $ = (id) => document.getElementById(id);
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -165,6 +165,7 @@ function newBudget() {
     id: newId(),
     event: '',
     days: '',
+    description: '',
     section: '',
     items: [DEFAULT_ITEM_TEXT],
     total: 0,
@@ -225,13 +226,14 @@ window.addEventListener('popstate', (event) => {
   else showList();
 });
 
-const fields = { event: 'f-event', days: 'f-days', section: 'f-section', closing: 'f-closing' };
+const fields = { event: 'f-event', days: 'f-days', description: 'f-description', section: 'f-section', closing: 'f-closing' };
 
 function openEditor(id, historyMode) {
   current = budgets.find((b) => b.id === id);
   if (historyMode === 'push') history.pushState({ budgetId: id }, '');
   if (historyMode === 'replace') history.replaceState({ budgetId: id }, '');
-  for (const [key, inputId] of Object.entries(fields)) $(inputId).value = current[key];
+  for (const [key, inputId] of Object.entries(fields)) $(inputId).value = current[key] ?? '';
+  requestAnimationFrame(() => fitTextarea($('f-description')));
   $('f-total').value = current.total ? formatMoney(current.total) : '';
   $('f-words').value = current.totalWords;
   renderItems();
@@ -285,6 +287,11 @@ function renderItems() {
   });
 }
 
+function fitTextarea(area) {
+  area.style.height = 'auto';
+  area.style.height = area.scrollHeight + 'px';
+}
+
 function swapItems(a, b) {
   [current.items[a], current.items[b]] = [current.items[b], current.items[a]];
 }
@@ -292,6 +299,7 @@ function swapItems(a, b) {
 for (const [key, inputId] of Object.entries(fields)) {
   $(inputId).addEventListener('input', (e) => {
     current[key] = cleanInput(e.target);
+    if (e.target.tagName === 'TEXTAREA') fitTextarea(e.target);
     if (key === 'event') $('screen-title').textContent = current.event || 'Presupuesto';
     touch();
   });
@@ -415,9 +423,19 @@ $('download-pdf').onclick = () => runPdfAction(async (file) => download(file));
 const issuerDialog = $('issuer-dialog');
 function openIssuerDialog() {
   for (const input of issuerDialog.querySelectorAll('input')) input.value = issuer[input.name] ?? '';
+  updateSignaturePreview();
   issuerDialog.returnValue = '';
   issuerDialog.showModal();
 }
+function updateSignaturePreview() {
+  const text = issuerDialog.querySelector('[name=signature]').value.trim();
+  $('signature-preview').textContent = text || 'Así se verá tu firma';
+  $('signature-preview').classList.toggle('empty', !text);
+}
+issuerDialog.querySelector('[name=signature]').addEventListener('input', (e) => {
+  cleanInput(e.target);
+  updateSignaturePreview();
+});
 $('open-issuer').onclick = openIssuerDialog;
 $('issuer-missing-btn').onclick = openIssuerDialog;
 $('cancel-issuer').onclick = () => issuerDialog.close();

@@ -54,6 +54,7 @@
       <h2 class="section-title">Evento</h2>
       <label>Nombre del evento <input id="f-event" name="event" autocomplete="off" placeholder="Fiesta Nacional del Sol"></label>
       <label>Días <input id="f-days" name="days" autocomplete="off" placeholder="20, 21 y 22 de Noviembre de 2.026 (Armado 17/11).-"></label>
+      <label>Descripción <textarea id="f-description" name="description" rows="3" placeholder="Proyector multimedia 6500 lúmenes, notebook, estructura de montaje y operador técnico.-"></textarea></label>
       <label>Título de sección <input id="f-section" name="section" autocomplete="off" placeholder="SET DE TELEVISIÓN"></label>
 
       <h2 class="section-title">Ítems</h2>
@@ -99,9 +100,16 @@
       <h2 id="issuer-title" class="section-title">Mis datos</h2>
       <label>Nombre <input name="name" autocomplete="name"></label>
       <label>CUIT <input name="cuit" inputmode="numeric" autocomplete="off"></label>
+      <label>N° de proveedor del Estado <input name="providerNumber" inputmode="numeric" autocomplete="off" placeholder="78101"></label>
+      <label>Dirección <input name="address" autocomplete="street-address"></label>
       <label>Email <input name="email" type="email" autocomplete="email"></label>
       <label>Teléfono <input name="phone" type="tel" autocomplete="tel"></label>
       <label>Ciudad (para la fecha) <input name="city" autocomplete="address-level2"></label>
+
+      <h3 class="section-title">Firma</h3>
+      <label>Firma (se escribe en cursiva) <input name="signature" autocomplete="off" placeholder="Celeste Irrazabal"></label>
+      <p id="signature-preview" class="signature-preview empty" aria-hidden="true">Así se verá tu firma</p>
+      <label>DNI <input name="dni" inputmode="numeric" autocomplete="off" placeholder="42.917.638"></label>
       <div class="actions">
         <button type="button" id="cancel-issuer" class="ghost">Cancelar</button>
         <button value="save" class="primary">Guardar</button>

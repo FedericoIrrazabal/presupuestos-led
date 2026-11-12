@@ -21,4 +21,4 @@ Abrir http://localhost:8765. Para instalarla en el celular hay que servirla por 
 
 ## Datos del emisor
 
-Los datos del emisor (nombre, CUIT, mail, teléfono y ciudad) no están en el código: cada teléfono los carga una vez desde ⚙ «Mis datos» y quedan solo en ese dispositivo.
+Los datos del emisor (nombre, CUIT, N° de proveedor del Estado, dirección, mail, teléfono, ciudad, firma en cursiva y DNI) no están en el código: cada teléfono los carga una vez desde ⚙ «Mis datos» y quedan solo en ese dispositivo.
