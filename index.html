@@ -109,7 +109,8 @@
       <h3 class="section-title">Firma</h3>
       <label>Firma (se escribe en cursiva) <input name="signature" autocomplete="off" placeholder="Celeste Irrazabal"></label>
       <p id="signature-preview" class="signature-preview empty" aria-hidden="true">Así se verá tu firma</p>
-      <label>DNI <input name="dni" inputmode="numeric" autocomplete="off" placeholder="42.917.638"></label>
+      <label>DNI <input name="dni" inputmode="numeric" autocomplete="off" placeholder="42.917.638" aria-describedby="dni-hint"></label>
+      <p id="dni-hint" class="hint dni-hint">Se completa solo con el CUIT. Podés cambiarlo.</p>
       <div class="actions">
         <button type="button" id="cancel-issuer" class="ghost">Cancelar</button>
         <button value="save" class="primary">Guardar</button>

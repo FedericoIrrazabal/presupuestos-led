@@ -421,8 +421,22 @@ $('download-pdf').onclick = () => runPdfAction(async (file) => download(file));
 // ---------- Issuer ----------
 
 const issuerDialog = $('issuer-dialog');
+const cuitInput = issuerDialog.querySelector('[name=cuit]');
+const dniInput = issuerDialog.querySelector('[name=dni]');
+let derivedDni = '';
+
+// The DNI follows the CUIT until the user types a different one by hand.
+function syncDniFromCuit() {
+  const next = dniFromCuit(cuitInput.value);
+  if (!dniInput.value.trim() || dniInput.value.trim() === derivedDni) dniInput.value = next;
+  derivedDni = next;
+}
+cuitInput.addEventListener('input', syncDniFromCuit);
+
 function openIssuerDialog() {
   for (const input of issuerDialog.querySelectorAll('input')) input.value = issuer[input.name] ?? '';
+  derivedDni = dniFromCuit(cuitInput.value);
+  if (!dniInput.value.trim()) dniInput.value = derivedDni;
   updateSignaturePreview();
   issuerDialog.returnValue = '';
   issuerDialog.showModal();

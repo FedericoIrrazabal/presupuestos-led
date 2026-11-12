@@ -37,6 +37,13 @@ function toPdfText(text) {
     .replace(/ {2,}/g, ' ');
 }
 
+// A CUIT is <type>-<DNI>-<check digit>, so the 8 middle digits are the DNI.
+function dniFromCuit(cuit) {
+  const digits = String(cuit ?? '').replace(/\D/g, '');
+  if (digits.length !== 11) return '';
+  return Number(digits.slice(2, 10)).toLocaleString('es-AR');
+}
+
 function isPrintableItem(item) {
   const text = item.trim();
   return text !== '' && text.toLowerCase() !== DEFAULT_ITEM_TEXT.trim().toLowerCase();
@@ -217,7 +224,7 @@ async function buildPdf(rawBudget, rawIssuer) {
 
   const signatureLines = [
     issuer.name && issuer.name.toUpperCase(),
-    issuer.dni && 'D.N.I Nº ' + issuer.dni,
+    (issuer.dni || dniFromCuit(issuer.cuit)) && 'D.N.I Nº ' + (issuer.dni || dniFromCuit(issuer.cuit)),
     issuer.phone && 'Teléfono: ' + issuer.phone,
   ].filter(Boolean);
   if (issuer.signature || signatureLines.length) {

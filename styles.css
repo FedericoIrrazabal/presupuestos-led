@@ -221,6 +221,7 @@ dialog .actions button { flex: 1; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .signature-preview.empty { color: #767676; }
+.dni-hint { margin: -8px 0 14px; }
 
 /* ---------- Toast ---------- */
 .toast {
